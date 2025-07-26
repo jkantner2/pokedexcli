@@ -2,12 +2,11 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"strings"
+
+	"github.com/jkantner2/pokedexcli/internal/pokeapi"
 )
 
 func startRepl(cfg *config) {
@@ -57,25 +56,20 @@ func getCommands() map[string]cliCommand {
 	    "map": {
 		name: 		"map",
 		description:	"page through list of map locations",
-		callback:	nmap,
+		callback:	commandMapf,
     		},
 	    "mapb": {
 		name:		"mapb",
 		description:	"step backwards through list of map locations",
-		callback:	mapb,
+		callback:	commandMapb,
 		},
     }
 }
 
 type config struct {
-    pokeapiClient	pokeapi.Client
-    nextURL		string
-    prevURL		string
-}
-
-var currentConfig = config {
-	nextURL:	"https://pokeapi.co/api/v2/location-area",
-	prevURL:	"",
+    pokeapiClient		pokeapi.Client
+    nextLocationsURL		*string
+    prevLocationsURL		*string
 }
 
 type mapInfo struct{
@@ -94,69 +88,3 @@ func cleanInput(text string)[]string {
 	return output
 }
 
-
-
-func nmap(cfg *config) error {
-	res, err := http.Get(config.nextURL)
-	if err != nil {
-		return fmt.Errorf("error creating request: %w", err)
-	}
-	defer res.Body.Close()
-
-	data, err := io.ReadAll(res.Body)
-	if err != nil {
-		return fmt.Errorf("error reading response: %w", err)
-	}
-
-	var mapInformation mapInfo
-	if err := json.Unmarshal(data, &mapInformation); err != nil {
-		return fmt.Errorf("error unmarshaling json data: %w", err)
-	}
-	
-	config.nextURL = mapInformation.Next
-	config.prevURL = mapInformation.Previous
-
-	var listOfNames []string
-
-	for _, result := range mapInformation.Results{
-		listOfNames = append(listOfNames, result.Name)
-	}
-
-	for _, name := range listOfNames {
-		fmt.Println(name)
-	}
-
-	return nil
-}
-
-func mapb(cfg *config) error {
-	res, err := http.Get(config.prevURL)
-	if err != nil {
-		return fmt.Errorf("error creating request: %w", err)
-	}
-	defer res.Body.Close()
-
-	data, err := io.ReadAll(res.Body)
-	if err != nil {
-		return fmt.Errorf("error reading response: %w", err)
-	}
-
-	var mapInformation mapInfo
-	if err := json.Unmarshal(data, &mapInformation); err != nil {
-		return fmt.Errorf("error unmarshaling json data: %w", err)
-	}
-	
-	config.nextURL = mapInformation.Next
-	config.prevURL = mapInformation.Previous
-
-	var listOfNames []string
-
-	for _, result := range mapInformation.Results{
-		listOfNames = append(listOfNames, result.Name)
-	}
-
-	for _, name := range listOfNames {
-		fmt.Println(name)
-	}
-	return nil
-}
