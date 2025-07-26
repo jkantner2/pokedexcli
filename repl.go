@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func startRepl() {
+func startRepl(cfg *config) {
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Print("Pokedex > ")
@@ -19,12 +19,18 @@ func startRepl() {
 		if len(cleanText) == 0 {
 			continue
 		}
-		firstWord := cleanText[0]
-		_, ok := cliCommands[firstWord]
-		if !ok {
+		commandName := cleanText[0]
+		command, ok := getCommands()[commandName]
+		if ok {
+			err := command.callback(cfg)
+			if err != nil {
+				fmt.Println(err)
+			}
+			continue
+		} else {
 			fmt.Println("Unknown command")
+			continue
 		}
-		cliCommands[firstWord].callback(&currentConfig)
 	}
 }
 
@@ -34,34 +40,37 @@ type cliCommand struct{
     callback	func(config *config) error
 }
 
-var cliCommands = map[string]cliCommand{
-    "exit": {
-    	name:		"exit",
-	description:	"Exit the Pokedex",
-	callback:	commandExit,
-    },
+func getCommands() map[string]cliCommand {
+	return map[string]cliCommand{
+	    "exit": {
+    		name:		"exit",
+		description:	"Exit the Pokedex",
+		callback:	commandExit,
+    		},
 
-    "help": {
-	name:		"help",
-	description:	"display manual page listing commands and their function",
-	callback:	commandHelp,
-    },
+	    "help": {
+		name:		"help",
+		description:	"display manual page listing commands and their function",
+		callback:	commandHelp,
+		},
 
-    "map": {
-	name: 		"map",
-	description:	"page through list of map locations",
-	callback:	nmap,
-    },
-    "mapb": {
-	name:		"mapb",
-	description:	"step backwards through list of map locations",
-	callback:	mapb,
-    },
+	    "map": {
+		name: 		"map",
+		description:	"page through list of map locations",
+		callback:	nmap,
+    		},
+	    "mapb": {
+		name:		"mapb",
+		description:	"step backwards through list of map locations",
+		callback:	mapb,
+		},
+    }
 }
 
 type config struct {
-    nextURL	string
-    prevURL	string
+    pokeapiClient	pokeapi.Client
+    nextURL		string
+    prevURL		string
 }
 
 var currentConfig = config {
@@ -85,18 +94,9 @@ func cleanInput(text string)[]string {
 	return output
 }
 
-func commandExit(config *config) error {
-	fmt.Println("Closing the Pokedex... Goodbye!")
-	os.Exit(0)
-	return nil
-}
 
-func commandHelp(config *config) error {
-	fmt.Printf("Welcome to the Pokedex!\nUsage:\n\nhelp: Displays a help message\nexit: Exit the Pokedex\nmap: Pagenates through locations\nmapb: Steps back through locations")
-	return nil
-}
 
-func nmap(config *config) error {
+func nmap(cfg *config) error {
 	res, err := http.Get(config.nextURL)
 	if err != nil {
 		return fmt.Errorf("error creating request: %w", err)
@@ -129,7 +129,7 @@ func nmap(config *config) error {
 	return nil
 }
 
-func mapb(config *config) error {
+func mapb(cfg *config) error {
 	res, err := http.Get(config.prevURL)
 	if err != nil {
 		return fmt.Errorf("error creating request: %w", err)
