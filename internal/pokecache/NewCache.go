@@ -4,8 +4,8 @@ import (
 	"time"
 )
 
-func NewCache(interval time.Duration) (Cache) {
+func NewCache(interval time.Duration) (*Cache) {
 	newCache := Cache{}
 	newCache.reapLoop(interval)
-	return newCache
+	return &newCache
 }
