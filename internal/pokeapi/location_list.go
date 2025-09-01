@@ -31,6 +31,7 @@ func (c *Client) ListLocations(pageURL *string) (RespShallowLocations, error) {
 	if err != nil {
 		return RespShallowLocations{}, err
 	}
+
 	defer resp.Body.Close()
 
 	dat, err := io.ReadAll(resp.Body)
