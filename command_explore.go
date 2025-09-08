@@ -4,8 +4,8 @@ import(
 	"fmt"
 )
 
-func commandExplore(cfg *config, argument []string) error {
-	exploreResp, err := cfg.pokeapiClient.ExploreLocation(argument)
+func commandExplore(cfg *config, location []string) error {
+	exploreResp, err := cfg.pokeapiClient.ExploreLocation(location)
 	if err != nil {
 		return err
 	}

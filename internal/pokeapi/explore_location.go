@@ -7,10 +7,11 @@ import (
 )
 
 // List pokemon within a locaiton
-func (c *Client) ExploreLocation(argument []string) (RespShallowExplore, error) {
+func (c *Client) ExploreLocation(location []string) (RespShallowExplore, error) {
 	url := baseURL + "/location-area"
-	if len(argument) != 0{
-		for _, val := range argument {
+
+	if len(location) != 0 {
+		for _, val := range location {
 			url = url + "/" + val
 		}
 	}
