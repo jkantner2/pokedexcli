@@ -42,11 +42,23 @@ type cliCommand struct{
 
 func getCommands() map[string]cliCommand {
 	return map[string]cliCommand{
+	    "catch": {
+		name:		"catch <pokemon_name>",
+		description:	"attempts to capture the requested pokemon",
+		callback:	commandCatch,
+	   	 },
+
 	    "exit": {
     		name:		"exit",
 		description:	"Exit the Pokedex",
 		callback:	commandExit,
     		},
+
+	    "explore": {
+		name:		"explore <location_name>",
+		description:	"list all pokemone available in the entered area",
+		callback:	commandExplore,
+	   	 },
 
 	    "help": {
 		name:		"help",
@@ -54,25 +66,28 @@ func getCommands() map[string]cliCommand {
 		callback:	commandHelp,
 		},
 
+	    "inspect": {
+	    	name:		"inspect <pokemon_name>",
+		description:	"list stats of requested pokemon",
+		callback:	commandInspect,
+		},
+
 	    "map": {
 		name: 		"map",
 		description:	"page through list of map locations",
 		callback:	commandMapf,
     		},
+
 	    "mapb": {
 		name:		"mapb",
 		description:	"step backwards through list of map locations",
 		callback:	commandMapb,
 		},
-	    "explore": {
-		name:		"explore",
-		description:	"list all pokemone available in the entered area",
-		callback:	commandExplore,
-	    },
-	    "catch": {
-		name:		"catch",
-		description:	"attempts to capture the requested pokemon",
-		callback:	commandCatch,
+
+		"pokedex": {
+		name:		"pokedex",
+		description:	"list names of all captured pokemon",
+		callback:	commandPokedex,
 	    },
     }
 }
